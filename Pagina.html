@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hypothesis Testing Lab | C8–C9</title>
+  <style>
+    :root{
+      --bg:#08111f;
+      --card:#101c31;
+      --card2:#14243d;
+      --text:#f3f7ff;
+      --muted:#9fb1d1;
+      --accent:#64d2ff;
+      --accent2:#9b7cff;
+      --danger:#ff6b6b;
+      --success:#4ade80;
+      --warning:#facc15;
+      --line:rgba(255,255,255,.12);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,Arial,sans-serif}
+    body{
+      background:
+        radial-gradient(circle at top left, rgba(100,210,255,.18), transparent 35%),
+        radial-gradient(circle at top right, rgba(155,124,255,.20), transparent 30%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    header{
+      padding:55px 8% 35px;
+      text-align:center;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:8px 14px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:var(--accent);
+      background:rgba(255,255,255,.04);
+      font-size:.85rem;
+      margin-bottom:18px;
+    }
+
+    h1{
+      font-size:clamp(2.2rem,5vw,4.4rem);
+      line-height:1;
+      letter-spacing:-2px;
+      margin-bottom:18px;
+    }
+
+    .hero-text{
+      max-width:850px;
+      margin:auto;
+      color:var(--muted);
+      font-size:1.08rem;
+      line-height:1.7;
+    }
+
+    main{
+      width:min(1250px,92%);
+      margin:auto;
+      padding-bottom:60px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      margin:25px 0 28px;
+      flex-wrap:wrap;
+    }
+
+    .tab{
+      border:none;
+      padding:14px 22px;
+      border-radius:16px;
+      color:var(--text);
+      background:var(--card);
+      cursor:pointer;
+      border:1px solid var(--line);
+      font-weight:700;
+    }
+
+    .tab.active{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#06101f;
+    }
+
+    section{
+      display:none;
+    }
+
+    section.active{
+      display:block;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:22px;
+    }
+
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,.24);
+      backdrop-filter:blur(12px);
+    }
+
+    .card h2{
+      margin-bottom:6px;
+      font-size:1.35rem;
+    }
+
+    .sub{
+      color:var(--muted);
+      margin-bottom:20px;
+      line-height:1.55;
+    }
+
+    .control{
+      margin-bottom:18px;
+      padding:15px;
+      background:rgba(255,255,255,.035);
+      border:1px solid var(--line);
+      border-radius:18px;
+    }
+
+    label{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      color:var(--text);
+      font-weight:700;
+      margin-bottom:10px;
+      font-size:.95rem;
+    }
+
+    input,select,textarea{
+      width:100%;
+      background:#07101f;
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      outline:none;
+    }
+
+    input[type="range"]{
+      padding:0;
+      accent-color:var(--accent);
+    }
+
+    .range-row{
+      display:grid;
+      grid-template-columns:1fr 105px;
+      gap:12px;
+      align-items:center;
+    }
+
+    .mini-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:14px;
+    }
+
+    @media(max-width:620px){
+      .mini-grid{grid-template-columns:1fr}
+    }
+
+    canvas{
+      width:100%;
+      background:#06101f;
+      border-radius:22px;
+      border:1px solid var(--line);
+      margin-top:12px;
+    }
+
+    .result{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:14px;
+      margin-top:18px;
+    }
+
+    @media(max-width:620px){
+      .result{grid-template-columns:1fr}
+    }
+
+    .metric{
+      padding:16px;
+      background:var(--card2);
+      border-radius:18px;
+      border:1px solid var(--line);
+    }
+
+    .metric span{
+      display:block;
+      color:var(--muted);
+      font-size:.82rem;
+      margin-bottom:5px;
+    }
+
+    .metric strong{
+      font-size:1.25rem;
+    }
+
+    .decision{
+      margin-top:16px;
+      padding:18px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(100,210,255,.08);
+      line-height:1.6;
+    }
+
+    .reject{
+      color:var(--danger);
+      font-weight:900;
+    }
+
+    .fail{
+      color:var(--success);
+      font-weight:900;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:16px;
+      overflow:hidden;
+      border-radius:16px;
+    }
+
+    th,td{
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      color:var(--muted);
+    }
+
+    th{
+      color:var(--text);
+      background:rgba(255,255,255,.06);
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:13px 17px;
+      font-weight:800;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#05101e;
+      margin-top:10px;
+    }
+
+    .note{
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.55;
+      margin-top:12px;
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      padding:35px 8%;
+      border-top:1px solid var(--line);
+      margin-top:40px;
+    }
+
+    a{color:var(--accent)}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="badge">Global Economics · Grade 11 · C8–C9</div>
+    <h1>Interactive Hypothesis Testing Lab</h1>
+    <p class="hero-text">
+      A professional web implementation for hypothesis testing. This tool allows users to manually control test parameters,
+      visualize p-values on a normal curve, upload two-group CSV datasets, and automatically generate statistical conclusions.
+    </p>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('manual', this)">C8 Manual Mode</button>
+      <button class="tab" onclick="showTab('csv', this)">C9 CSV Mode</button>
+      <button class="tab" onclick="showTab('report', this)">C10 Report Guide</button>
+    </div>
+
+    <section id="manual" class="active">
+      <div class="grid">
+        <div class="card">
+          <h2>Manual Test Parameters</h2>
+          <p class="sub">Modify each parameter using sliders and input boxes. The graph and decision update automatically.</p>
+
+          <div class="mini-grid">
+            <div class="control">
+              <label>Test Type</label>
+              <select id="manualType">
+                <option value="proportion">Proportion Test</option>
+                <option value="mean">Mean Test</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label>Test Direction</label>
+              <select id="tail">
+                <option value="right">Right-tailed</option>
+                <option value="left">Left-tailed</option>
+                <option value="two">Two-tailed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="control">
+            <label>Significance Level α <span id="alphaVal">0.05</span></label>
+            <div class="range-row">
+              <input id="alpha" type="range" min="0.01" max="0.20" step="0.01" value="0.05">
+              <input id="alphaBox" type="number" min="0.01" max="0.20" step="0.01" value="0.05">
+            </div>
+          </div>
+
+          <div id="proportionControls">
+            <div class="control">
+              <label>Benchmark Proportion p₀ <span id="p0Val">0.50</span></label>
+              <div class="range-row">
+                <input id="p0" type="range" min="0.01" max="0.99" step="0.01" value="0.50">
+                <input id="p0Box" type="number" min="0.01" max="0.99" step="0.01" value="0.50">
+              </div>
+            </div>
+
+            <div class="control">
+              <label>Sample Proportion p̂ <span id="phatVal">0.58</span></label>
+              <div class="range-row">
+                <input id="phat" type="range" min="0.01" max="0.99" step="0.01" value="0.58">
+                <input id="phatBox" type="number" min="0.01" max="0.99" step="0.01" value="0.58">
+              </div>
+            </div>
+
+            <div class="control">
+              <label>Sample Size n <span id="nVal">120</span></label>
+              <div class="range-row">
+                <input id="n" type="range" min="10" max="1000" step="1" value="120">
+                <input id="nBox" type="number" min="10" max="1000" step="1" value="120">
+              </div>
+            </div>
+          </div>
+
+          <div id="meanControls" style="display:none">
+            <div class="control">
+              <label>Benchmark Mean μ₀ <span id="mu0Val">50</span></label>
+              <div class="range-row">
+                <input id="mu0" type="range" min="0" max="100" step="0.1" value="50">
+                <input id="mu0Box" type="number" min="0" max="100" step="0.1" value="50">
+              </div>
+            </div>
+
+            <div class="control">
+              <label>Sample Mean x̄ <span id="xbarVal">53</span></label>
+              <div class="range-row">
+                <input id="xbar" type="range" min="0" max="100" step="0.1" value="53">
+                <input id="xbarBox" type="number" min="0" max="100" step="0.1" value="53">
+              </div>
+            </div>
+
+            <div class="control">
+              <label>Standard Deviation s <span id="sdVal">12</span></label>
+              <div class="range-row">
+                <input id="sd" type="range" min="1" max="50" step="0.1" value="12">
+                <input id="sdBox" type="number" min="1" max="50" step="0.1" value="12">
+              </div>
+            </div>
+
+            <div class="control">
+              <label>Sample Size n <span id="mnVal">100</span></label>
+              <div class="range-row">
+                <input id="mn" type="range" min="10" max="1000" step="1" value="100">
+                <input id="mnBox" type="number" min="10" max="1000" step="1" value="100">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Normal Curve Interpretation</h2>
+          <p class="sub">The observed z statistic, p-value region, and critical region are shown below.</p>
+          <canvas id="manualCanvas" width="800" height="420"></canvas>
+
+          <div class="result">
+            <div class="metric"><span>Observed z statistic</span><strong id="zOut">0.00</strong></div>
+            <div class="metric"><span>p-value</span><strong id="pOut">0.0000</strong></div>
+            <div class="metric"><span>Critical value / region</span><strong id="critOut">—</strong></div>
+            <div class="metric"><span>Decision</span><strong id="decisionOut">—</strong></div>
+          </div>
+
+          <div class="decision" id="conclusionOut"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="csv">
+      <div class="grid">
+        <div class="card">
+          <h2>CSV Automatic Hypothesis Test</h2>
+          <p class="sub">
+            Upload a two-group CSV file. The webpage detects columns and computes summary statistics, z statistic, p-value, and decision.
+          </p>
+
+          <div class="control">
+            <label>Upload CSV File</label>
+            <input type="file" id="csvFile" accept=".csv">
+          </div>
+
+          <div class="mini-grid">
+            <div class="control">
+              <label>CSV Test Type</label>
+              <select id="csvType">
+                <option value="mean">Mean-based CSV</option>
+                <option value="proportion">Proportion-based CSV</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label>Test Direction</label>
+              <select id="csvTail">
+                <option value="right">Right-tailed</option>
+                <option value="left">Left-tailed</option>
+                <option value="two">Two-tailed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="control">
+            <label>Significance Level α</label>
+            <input id="csvAlpha" type="number" min="0.01" max="0.20" step="0.01" value="0.05">
+          </div>
+
+          <div class="mini-grid">
+            <div class="control">
+              <label>Benchmark Group</label>
+              <select id="benchmarkGroup"></select>
+            </div>
+
+            <div class="control">
+              <label>Test Group</label>
+              <select id="testGroup"></select>
+            </div>
+          </div>
+
+          <button class="btn" onclick="runCsvTest()">Run CSV Hypothesis Test</button>
+          <p class="note">
+            For mean-based files, use two numeric group columns. For proportion-based files, use a group column and a binary success column with 0/1 values.
+          </p>
+
+          <div id="summaryTable"></div>
+        </div>
+
+        <div class="card">
+          <h2>CSV Result Visualization</h2>
+          <p class="sub">The CSV p-value is displayed using the same normal-curve method as C8.</p>
+          <canvas id="csvCanvas" width="800" height="420"></canvas>
+
+          <div class="result">
+            <div class="metric"><span>Observed z statistic</span><strong id="csvZ">—</strong></div>
+            <div class="metric"><span>p-value</span><strong id="csvP">—</strong></div>
+            <div class="metric"><span>Decision</span><strong id="csvDecision">—</strong></div>
+            <div class="metric"><span>Conclusion</span><strong id="csvShort">—</strong></div>
+          </div>
+
+          <div class="decision" id="csvConclusion">
+            Upload a CSV file and run the test to generate an automatic statistical interpretation.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="report">
+      <div class="card">
+        <h2>C10 Evidence-Based Report Structure</h2>
+        <p class="sub">
+          Use this structure to write the final report using your webpage results and at least three reliable real-world sources.
+        </p>
+
+        <div class="decision">
+          <strong>Suggested headings:</strong><br><br>
+          <strong>Title:</strong> A clear title connected to the research context.<br>
+          <strong>Introduction:</strong> Explain the real-world issue and cite reliable sources using APA in-text citations.<br>
+          <strong>Research Question:</strong> State the question your hypothesis test answers.<br>
+          <strong>Methodology:</strong> Define H₀, H₁, test direction, significance level, and data source.<br>
+          <strong>Results:</strong> Report z statistic, p-value, decision, and graph interpretation.<br>
+          <strong>Discussion:</strong> Explain what the result means and discuss Type I and Type II errors.<br>
+          <strong>Conclusion:</strong> Give a contextual conclusion consistent with the statistical decision.<br>
+          <strong>References:</strong> Include all sources in APA 7 format.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Interactive Hypothesis Testing Lab · Designed for C8, C9 and C10 evidence-based statistical reasoning.
+  </footer>
+
+  <script>
+    function showTab(id, btn){
+      document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.classList.add("active");
+    }
+
+    function normalPDF(x){
+      return Math.exp(-0.5*x*x)/Math.sqrt(2*Math.PI);
+    }
+
+    function erf(x){
+      const sign = x >= 0 ? 1 : -1;
+      x = Math.abs(x);
+      const a1=0.254829592, a2=-0.284496736, a3=1.421413741, a4=-1.453152027, a5=1.061405429;
+      const p=0.3275911;
+      const t=1/(1+p*x);
+      const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+      return sign*y;
+    }
+
+    function normalCDF(x){
+      return 0.5*(1+erf(x/Math.sqrt(2)));
+    }
+
+    function inverseNormal(p){
+      let low=-6, high=6, mid;
+      for(let i=0;i<80;i++){
+        mid=(low+high)/2;
+        if(normalCDF(mid)<p) low=mid; else high=mid;
+      }
+      return (low+high)/2;
+    }
+
+    function pValue(z, tail){
+      if(tail==="right") return 1-normalCDF(z);
+      if(tail==="left") return normalCDF(z);
+      return 2*(1-normalCDF(Math.abs(z)));
+    }
+
+    function critical(alpha, tail){
+      if(tail==="right") return inverseNormal(1-alpha);
+      if(tail==="left") return inverseNormal(alpha);
+      return inverseNormal(1-alpha/2);
+    }
+
+    function drawCurve(canvasId, z, tail, alpha){
+      const canvas=document.getElementById(canvasId);
+      const ctx=canvas.getContext("2d");
+      const W=canvas.width, H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+
+      const margin=55;
+      const base=H-55;
+      const top=35;
+      const minX=-4, maxX=4;
+      const scaleX=x=>margin+(x-minX)/(maxX-minX)*(W-2*margin);
+      const scaleY=y=>base-y/0.42*(base-top);
+
+      ctx.strokeStyle="rgba(255,255,255,.25)";
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(margin,base);
+      ctx.lineTo(W-margin,base);
+      ctx.stroke();
+
+      function shade(from,to,color){
+        ctx.fillStyle=color;
+        ctx.beginPath();
+        ctx.moveTo(scaleX(from),base);
+        for(let x=from;x<=to;x+=0.02){
+          ctx.lineTo(scaleX(x),scaleY(normalPDF(x)));
+        }
+        ctx.lineTo(scaleX(to),base);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      if(tail==="right") shade(Math.max(z,minX),maxX,"rgba(100,210,255,.35)");
+      if(tail==="left") shade(minX,Math.min(z,maxX),"rgba(100,210,255,.35)");
+      if(tail==="two"){
+        shade(minX,Math.min(-Math.abs(z),maxX),"rgba(100,210,255,.35)");
+        shade(Math.max(Math.abs(z),minX),maxX,"rgba(100,210,255,.35)");
+      }
+
+      const c=critical(alpha,tail);
+      if(tail==="right") shade(c,maxX,"rgba(255,107,107,.18)");
+      if(tail==="left") shade(minX,c,"rgba(255,107,107,.18)");
+      if(tail==="two"){
+        shade(minX,-c,"rgba(255,107,107,.18)");
+        shade(c,maxX,"rgba(255,107,107,.18)");
+      }
+
+      ctx.strokeStyle="#f3f7ff";
+      ctx.lineWidth=3;
+      ctx.beginPath();
+      for(let x=minX;x<=maxX;x+=0.02){
+        const px=scaleX(x), py=scaleY(normalPDF(x));
+        if(x===minX) ctx.moveTo(px,py);
+        else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+
+      const zx=Math.max(minX,Math.min(maxX,z));
+      ctx.strokeStyle="#facc15";
+      ctx.lineWidth=3;
+      ctx.beginPath();
+      ctx.moveTo(scaleX(zx),base);
+      ctx.lineTo(scaleX(zx),top);
+      ctx.stroke();
+
+      ctx.fillStyle="#facc15";
+      ctx.font="bold 18px Inter, Arial";
+      ctx.fillText("z = "+z.toFixed(2), scaleX(zx)+8, top+24);
+
+      ctx.fillStyle="rgba(255,255,255,.65)";
+      ctx.font="14px Inter, Arial";
+      for(let x=-4;x<=4;x++){
+        ctx.fillText(x.toString(),scaleX(x)-5,base+24);
+      }
+    }
+
+    function bindRange(id, boxId, labelId){
+      const r=document.getElementById(id), b=document.getElementById(boxId), l=document.getElementById(labelId);
+      function syncFromRange(){ b.value=r.value; if(l)l.textContent=r.value; updateManual(); }
+      function syncFromBox(){ r.value=b.value; if(l)l.textContent=b.value; updateManual(); }
+      r.addEventListener("input",syncFromRange);
+      b.addEventListener("input",syncFromBox);
+    }
+
+    ["alpha","p0","phat","n","mu0","xbar","sd","mn"].forEach(id=>{
+      const map={alpha:"alphaVal",p0:"p0Val",phat:"phatVal",n:"nVal",mu0:"mu0Val",xbar:"xbarVal",sd:"sdVal",mn:"mnVal"};
+      bindRange(id,id+"Box",map[id]);
+    });
+
+    document.getElementById("manualType").addEventListener("change",()=>{
+      const type=document.getElementById("manualType").value;
+      document.getElementById("proportionControls").style.display=type==="proportion"?"block":"none";
+      document.getElementById("meanControls").style.display=type==="mean"?"block":"none";
+      updateManual();
+    });
+
+    document.getElementById("tail").addEventListener("change",updateManual);
+
+    function updateManual(){
+      const type=document.getElementById("manualType").value;
+      const tail=document.getElementById("tail").value;
+      const alpha=parseFloat(document.getElementById("alphaBox").value);
+      let z, context;
+
+      if(type==="proportion"){
+        const p0=parseFloat(document.getElementById("p0Box").value);
+        const phat=parseFloat(document.getElementById("phatBox").value);
+        const n=parseFloat(document.getElementById("nBox").value);
+        z=(phat-p0)/Math.sqrt((p0*(1-p0))/n);
+        context=`The sample proportion is compared against the benchmark proportion of ${p0.toFixed(2)}.`;
+      }else{
+        const mu0=parseFloat(document.getElementById("mu0Box").value);
+        const xbar=parseFloat(document.getElementById("xbarBox").value);
+        const sd=parseFloat(document.getElementById("sdBox").value);
+        const n=parseFloat(document.getElementById("mnBox").value);
+        z=(xbar-mu0)/(sd/Math.sqrt(n));
+        context=`The sample mean is compared against the benchmark mean of ${mu0.toFixed(2)}.`;
+      }
+
+      const p=pValue(z,tail);
+      const c=critical(alpha,tail);
+      const reject=p<alpha;
+
+      document.getElementById("zOut").textContent=z.toFixed(3);
+      document.getElementById("pOut").textContent=p.toFixed(4);
+      document.getElementById("critOut").textContent=tail==="two" ? `±${c.toFixed(3)}` : c.toFixed(3);
+      document.getElementById("decisionOut").innerHTML=reject ? `<span class="reject">Reject H₀</span>` : `<span class="fail">Fail to reject H₀</span>`;
+
+      document.getElementById("conclusionOut").innerHTML=
+        `${context}<br><br>Since the p-value is <strong>${p.toFixed(4)}</strong> and α is <strong>${alpha.toFixed(2)}</strong>, we <strong>${reject?"reject H₀":"fail to reject H₀"}</strong>. This means the evidence is ${reject?"statistically strong enough":"not statistically strong enough"} to support the alternative hypothesis in this context.<br><br>
+        <strong>Possible errors:</strong> A Type I error would mean rejecting a true null hypothesis. A Type II error would mean failing to reject a false null hypothesis.`;
+
+      drawCurve("manualCanvas",z,tail,alpha);
+    }
+
+    let csvData=[], headers=[];
+
+    document.getElementById("csvFile").addEventListener("change",e=>{
+      const file=e.target.files[0];
+      if(!file) return;
+      const reader=new FileReader();
+      reader.onload=event=>{
+        parseCSV(event.target.result);
+        populateGroupSelectors();
+      };
+      reader.readAsText(file);
+    });
+
+    function parseCSV(text){
+      const rows=text.trim().split(/\r?\n/).map(r=>r.split(",").map(x=>x.trim()));
+      headers=rows[0];
+      csvData=rows.slice(1).map(row=>{
+        const obj={};
+        headers.forEach((h,i)=>obj[h]=row[i]);
+        return obj;
+      });
+    }
+
+    function populateGroupSelectors(){
+      const bench=document.getElementById("benchmarkGroup");
+      const test=document.getElementById("testGroup");
+      bench.innerHTML="";
+      test.innerHTML="";
+      headers.forEach(h=>{
+        bench.innerHTML+=`<option value="${h}">${h}</option>`;
+        test.innerHTML+=`<option value="${h}">${h}</option>`;
+      });
+      if(headers.length>1) test.selectedIndex=1;
+    }
+
+    function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length}
+    function sd(arr){
+      const m=mean(arr);
+      return Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/(arr.length-1));
+    }
+
+    function runCsvTest(){
+      if(!csvData.length){
+        alert("Please upload a CSV file first.");
+        return;
+      }
+
+      const type=document.getElementById("csvType").value;
+      const alpha=parseFloat(document.getElementById("csvAlpha").value);
+      const tail=document.getElementById("csvTail").value;
+      const benchmark=document.getElementById("benchmarkGroup").value;
+      const test=document.getElementById("testGroup").value;
+
+      let z=0, p=0, table="", conclusion="";
+
+      if(type==="mean"){
+        const a=csvData.map(r=>parseFloat(r[benchmark])).filter(v=>!isNaN(v));
+        const b=csvData.map(r=>parseFloat(r[test])).filter(v=>!isNaN(v));
+
+        const ma=mean(a), mb=mean(b), sda=sd(a), sdb=sd(b);
+        const se=Math.sqrt((sda*sda/a.length)+(sdb*sdb/b.length));
+        z=(mb-ma)/se;
+        p=pValue(z,tail);
+
+        table=`
+          <table>
+            <tr><th>Group</th><th>n</th><th>Mean</th><th>SD</th></tr>
+            <tr><td>${benchmark}</td><td>${a.length}</td><td>${ma.toFixed(3)}</td><td>${sda.toFixed(3)}</td></tr>
+            <tr><td>${test}</td><td>${b.length}</td><td>${mb.toFixed(3)}</td><td>${sdb.toFixed(3)}</td></tr>
+          </table>
+        `;
+
+        conclusion=`The mean of ${test} was compared against the mean of ${benchmark}.`;
+      }else{
+        const groupColumn=headers[0];
+        const successColumn=headers[1];
+
+        const groups=[...new Set(csvData.map(r=>r[groupColumn]))];
+        if(groups.length<2){
+          alert("For proportion CSV mode, the first column should contain two group identifiers and the second column should contain 0/1 success values.");
+          return;
+        }
+
+        const g1=groups[0], g2=groups[1];
+        const a=csvData.filter(r=>r[groupColumn]===g1).map(r=>parseFloat(r[successColumn]));
+        const b=csvData.filter(r=>r[groupColumn]===g2).map(r=>parseFloat(r[successColumn]));
+
+        const p1=mean(a), p2=mean(b);
+        const pooled=(a.reduce((x,y)=>x+y,0)+b.reduce((x,y)=>x+y,0))/(a.length+b.length);
+        const se=Math.sqrt(pooled*(1-pooled)*(1/a.length+1/b.length));
+        z=(p2-p1)/se;
+        p=pValue(z,tail);
+
+        table=`
+          <table>
+            <tr><th>Group</th><th>n</th><th>Success Proportion</th></tr>
+            <tr><td>${g1}</td><td>${a.length}</td><td>${p1.toFixed(3)}</td></tr>
+            <tr><td>${g2}</td><td>${b.length}</td><td>${p2.toFixed(3)}</td></tr>
+          </table>
+        `;
+
+        conclusion=`The success proportion of ${g2} was compared against the success proportion of ${g1}.`;
+      }
+
+      const reject=p<alpha;
+
+      document.getElementById("summaryTable").innerHTML=table;
+      document.getElementById("csvZ").textContent=z.toFixed(3);
+      document.getElementById("csvP").textContent=p.toFixed(4);
+      document.getElementById("csvDecision").innerHTML=reject ? `<span class="reject">Reject H₀</span>` : `<span class="fail">Fail to reject H₀</span>`;
+      document.getElementById("csvShort").textContent=reject ? "Statistically significant" : "Not statistically significant";
+
+      document.getElementById("csvConclusion").innerHTML=
+        `${conclusion}<br><br>The calculated z statistic is <strong>${z.toFixed(3)}</strong> and the p-value is <strong>${p.toFixed(4)}</strong>. Since α = <strong>${alpha.toFixed(2)}</strong>, we <strong>${reject?"reject H₀":"fail to reject H₀"}</strong>. Therefore, the uploaded data provides ${reject?"sufficient":"insufficient"} statistical evidence for the alternative hypothesis.<br><br>
+        <strong>Possible errors:</strong> A Type I error would occur if the test finds a difference that is not truly present. A Type II error would occur if the test fails to detect a real difference.`;
+
+      drawCurve("csvCanvas",z,tail,alpha);
+    }
+
+    updateManual();
+    drawCurve("csvCanvas",0,"right",0.05);
+  </script>
+</body>
+</html>
